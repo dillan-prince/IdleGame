@@ -23,9 +23,10 @@ namespace Assets.Scripts.Repositories
             for (int i = 0; i < player.Shops.Count; i++)
             {
                 PlayerPrefs.SetInt("Shop[" + i.ToString() + "].NumberOwned", player.Shops[i].NumberOwned);
+                PlayerPrefs.SetFloat("Shop[" + i.ToString() + "].InitialCost", player.Shops[i].InitialCost);
                 PlayerPrefs.SetFloat("Shop[" + i.ToString() + "].Multiplier", player.Shops[i].Multiplier);
                 PlayerPrefs.SetFloat("Shop[" + i.ToString() + "].TimeToComplete", player.Shops[i].TimeToComplete);
-                PlayerPrefs.SetInt("Shop[" + i.ToString() + "].Manager", player.Shops[i].Manager ? 1 : 0);
+                PlayerPrefs.SetInt("Shop[" + i.ToString() + "].Manager", player.Shops[i].Managers);
                 PlayerPrefs.SetInt("Shop[" + i.ToString() + "].Working", player.Shops[i].Working ? 1 : 0);
                 PlayerPrefs.SetFloat("Shop[" + i.ToString() + "].TimeRemaining", player.Shops[i].TimeRemaining);
             }
@@ -42,9 +43,10 @@ namespace Assets.Scripts.Repositories
                 for (int i = 0; i < player.Shops.Count; i++)
                 {
                     player.Shops[i].NumberOwned = PlayerPrefs.GetInt("Shop[" + i.ToString() + "].NumberOwned", 0);
+                    player.Shops[i].InitialCost = PlayerPrefs.GetFloat("Shop[" + i.ToString() + "].InitialCost", player.Shops[i].InitialCost);
                     player.Shops[i].Multiplier = PlayerPrefs.GetFloat("Shop[" + i.ToString() + "].Multiplier", 1);
                     player.Shops[i].TimeToComplete = PlayerPrefs.GetFloat("Shop[" + i.ToString() + "].TimeToComplete");
-                    player.Shops[i].Manager = PlayerPrefs.GetInt("Shop[" + i.ToString() + "].Manager", 0) == 1;
+                    player.Shops[i].Managers = PlayerPrefs.GetInt("Shop[" + i.ToString() + "].Manager", 0);
                     player.Shops[i].Working = PlayerPrefs.GetInt("Shop[" + i.ToString() + "].Working", 0) == 1;
                     player.Shops[i].TimeRemaining = PlayerPrefs.GetFloat("Shop[" + i.ToString() + "].TimeRemaining", 0);
                 }
@@ -99,7 +101,7 @@ namespace Assets.Scripts.Repositories
             {
                 if (player.Shops[i].Working)
                 {
-                    if (player.Shops[i].Manager)
+                    if (player.Shops[i].Managers >= 1)
                     {
                         int workCompletionsWhileOffline = CalculateWorkCompletionsWhileOffline(player.Shops[i], offlineTimeSpan);
                         offlineEarnings += CalculateCurrentProfitOfShop(player.Shops[i]) * workCompletionsWhileOffline;
@@ -144,7 +146,7 @@ namespace Assets.Scripts.Repositories
                     Multiplier = Convert.ToSingle(values[4]),
                     TimeToComplete = Convert.ToSingle(values[5]),
                     InitialProfit = Convert.ToSingle(values[6]),
-                    Manager = Convert.ToBoolean(values[7]),
+                    Managers = Convert.ToInt32(values[7]),
                     Working = Convert.ToBoolean(values[8]),
                     Id = Convert.ToInt32(values[9])
                 });

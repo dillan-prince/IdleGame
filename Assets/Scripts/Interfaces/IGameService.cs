@@ -14,6 +14,9 @@ namespace Assets.Scripts.Interfaces
         void HideMenus();
         void RefreshCanvas();
         void UpdateStatistics();
-        IEnumerator WorkShop(ShopModel shop);
+        void Buy(int index);
+        void PurchaseManager(int index);
+        void ChangeBuyMultiple();
+        IEnumerator WorkShop(int index);
     }
 }

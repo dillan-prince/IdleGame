@@ -22,8 +22,11 @@ namespace Assets.Scripts.Services
         public Text[] shopMultipliers;
 
         public Text playerMoney;
+        public Text buyMultipleButtonText;
         public Text incomePerSecond;
         public Text globalMultiplier;
+
+        public GameObject[] managers;
 
         void Awake()
         {
@@ -35,7 +38,7 @@ namespace Assets.Scripts.Services
         {
             _gameRepository.Save();
         }
-        
+
         public void Load()
         {
             PlayerModel player = _gameRepository.Load();
@@ -43,7 +46,7 @@ namespace Assets.Scripts.Services
             foreach (ShopModel shop in player.Shops)
             {
                 if (shop.Working)
-                    StartCoroutine(WorkPartialShop(shop));
+                    StartCoroutine(WorkPartialShop(shop.Id));
             }
         }
 
@@ -60,7 +63,11 @@ namespace Assets.Scripts.Services
             UpdatePlayerMoney();
             UpdateCostOfShops();
             UpdateStatistics();
+            UpdateManagers();
+            UpdateRevenuePerSecond();
+            UpdateStatistics();
         }
+
         public void UpdateStatistics()
         {
             PlayerModel player = _gameRepository.GetPlayer();
@@ -70,9 +77,61 @@ namespace Assets.Scripts.Services
                 shopMultipliers[i].text = player.Shops[i].Name + " Multiplier: " + player.Shops[i].Multiplier.ToString();
         }
 
-        public IEnumerator WorkShop(ShopModel shop)
+        public void Buy(int index)
+        {
+            if (PlayerCanAffordShop(index))
+            {
+                PlayerModel player = _gameRepository.GetPlayer();
+                player.Money -= _gameRepository.CalculateCostOfShop(index);
+                player.Shops[index].NumberOwned += player.BuyMultiple;
+                RefreshCanvas();
+            }
+        }
+
+        public void PurchaseManager(int index)
         {
             PlayerModel player = _gameRepository.GetPlayer();
+            player.Shops[index % 10].Managers = index / 10 + 1;
+
+            if (player.Shops[index % 10].Managers == 2)
+                player.Shops[index % 10].InitialCost *= .9f;
+            else if (player.Shops[index % 10].Managers == 3)
+                player.Shops[index % 10].InitialCost *= .00001f;
+
+            RefreshCanvas();
+        }
+
+        public void ChangeBuyMultiple()
+        {
+            PlayerModel player = _gameRepository.GetPlayer();
+
+            switch (buyMultipleButtonText.text)
+            {
+                case "x1":
+                    player.BuyMultiple = 10;
+                    buyMultipleButtonText.text = "x10";
+                    break;
+                case "x10":
+                    player.BuyMultiple = 100;
+                    buyMultipleButtonText.text = "x100";
+                    break;
+                case "x100":
+                    player.BuyMultiple = 250;
+                    buyMultipleButtonText.text = "x250";
+                    break;
+                case "x250":
+                    player.BuyMultiple = 1;
+                    buyMultipleButtonText.text = "x1";
+                    break;
+            }
+
+            UpdateCostOfShops();
+        }
+
+        public IEnumerator WorkShop(int index)
+        {
+            PlayerModel player = _gameRepository.GetPlayer();
+            ShopModel shop = player.Shops[index];
             Stopwatch watch;
             if (!shop.Working && shop.NumberOwned > 0)
             {
@@ -98,14 +157,13 @@ namespace Assets.Scripts.Services
                 UpdatePlayerMoney();
                 UpdateTimeRemaining(shop);
 
-                if (shop.Manager)
-                    StartCoroutine(WorkShop(shop));
+                if (shop.Managers >= 1)
+                    StartCoroutine(WorkShop(index));
             }
         }
         #endregion
 
         #region Private Methods
-
         private void UpdateCostOfShops()
         {
             for (int i = 0; i < shopCosts.Length; i++)
@@ -141,9 +199,48 @@ namespace Assets.Scripts.Services
                 playerMoney.text = player.Money.ToString("C");
         }
 
-        private IEnumerator WorkPartialShop(ShopModel shop)
+        private void UpdateRevenuePerSecond()
         {
             PlayerModel player = _gameRepository.GetPlayer();
+            player.RevenuePerSecond = 0;
+            for (int i = 0; i < player.Shops.Count; i++)
+            {
+                player.Shops[i].RevenuePerSecond = _gameRepository.CalculateCurrentProfitOfShop(player.Shops[i]) / player.Shops[i].TimeToComplete;
+                if (player.Shops[i].Managers >= 1)
+                    player.RevenuePerSecond += player.Shops[i].RevenuePerSecond;
+            }
+        }
+
+        private void UpdateManagers()
+        {
+            PlayerModel player = _gameRepository.GetPlayer();
+            List<int> managersToShow = Enumerable.Range(0, managers.Length).ToList();
+            for (int i = 0; i < player.Shops.Count; i++)
+            {
+                for (int j = 0; j < player.Shops[i].Managers; j++)
+                    managersToShow.Remove(i + 10 * j);
+            }
+
+            foreach (GameObject manager in managers)
+                manager.SetActive(false);
+
+            for (int i = 0; i < Math.Min(6, managersToShow.Count); i++)
+            {
+                managers[managersToShow[i]].SetActive(true);
+                managers[managersToShow[i]].transform.localPosition = new Vector2(0, 210 - 70 * i);
+            }
+        }
+
+        private bool PlayerCanAffordShop(int index)
+        {
+            PlayerModel player = _gameRepository.GetPlayer();
+            return player.Money > _gameRepository.CalculateCostOfShop(index);
+        }
+
+        private IEnumerator WorkPartialShop(int index)
+        {
+            PlayerModel player = _gameRepository.GetPlayer();
+            ShopModel shop = player.Shops[index];
             Stopwatch watch;
             do
             {
@@ -163,8 +260,8 @@ namespace Assets.Scripts.Services
             UpdatePlayerMoney();
             UpdateTimeRemaining(shop);
 
-            if (shop.Manager)
-                StartCoroutine(WorkShop(shop));
+            if (shop.Managers >= 1)
+                StartCoroutine(WorkShop(index));
         }
         #endregion
     }
