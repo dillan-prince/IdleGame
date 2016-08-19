@@ -12,7 +12,17 @@ namespace Assets.Scripts.Repositories
     {
         private static PlayerModel player;
 
+        private static List<ShopModel> _shops;
+        private static List<UpgradeModel> _upgrades;
+
         public TextAsset shopModelData;
+        public TextAsset upgradeModelData;
+
+        void Awake()
+        {
+            _shops = PopulateShops();
+            _upgrades = PopulateUpgrades();
+        }
 
         #region Public Methods
         public void Save()
@@ -63,6 +73,11 @@ namespace Assets.Scripts.Repositories
             return player;
         }
 
+        public List<UpgradeModel> GetUpgrades()
+        {
+            return _upgrades;
+        }
+
         public float CalculateCurrentProfitOfShop(ShopModel shop)
         {
             return shop.InitialProfit * shop.NumberOwned * shop.Multiplier * player.GlobalMultiplier;
@@ -79,16 +94,6 @@ namespace Assets.Scripts.Repositories
         #endregion
 
         #region Private Methods
-        private PlayerModel GenerateNewPlayer()
-        {
-            PlayerModel player = new PlayerModel();
-            player.Money = 0;
-            player.GlobalMultiplier = 1;
-            player.RevenuePerSecond = 0;
-            player.Shops = GetShops();
-
-            return player;
-        }
 
         private float CalculateOfflineEarnings()
         {
@@ -129,7 +134,18 @@ namespace Assets.Scripts.Repositories
             return (int)Math.Floor((offlineTimeSpan.TotalSeconds + shop.TimeToComplete - shop.TimeRemaining) / shop.TimeToComplete);
         }
 
-        private List<ShopModel> GetShops()
+        private PlayerModel GenerateNewPlayer()
+        {
+            PlayerModel player = new PlayerModel();
+            player.Money = 0;
+            player.GlobalMultiplier = 1;
+            player.RevenuePerSecond = 0;
+            player.Shops = _shops;
+
+            return player;
+        }
+
+        private List<ShopModel> PopulateShops()
         {
             List<ShopModel> shopModels = new List<ShopModel>();
 
@@ -153,6 +169,27 @@ namespace Assets.Scripts.Repositories
             }
 
             return shopModels;
+        }
+
+        private List<UpgradeModel> PopulateUpgrades()
+        {
+            List<UpgradeModel> upgradeModels = new List<UpgradeModel>();
+
+            string[] lines = upgradeModelData.text.Split('\n');
+            for (int i = 1; i < lines.Length - 1; i++)
+            {
+                string[] values = lines[i].Split(',');
+                upgradeModels.Add(new UpgradeModel
+                {
+                    Name = values[0],
+                    Id = Convert.ToInt32(values[1]),
+                    ShopId = Convert.ToInt32(values[2]),
+                    Multiplier = Convert.ToSingle(values[3]),
+                    Cost = Convert.ToSingle(values[4])
+                });
+            }
+
+            return upgradeModels;
         }
         #endregion
     }

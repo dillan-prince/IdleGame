@@ -11,6 +11,7 @@ namespace Assets.Scripts.Interfaces
         void Save();
         PlayerModel Load();
         PlayerModel GetPlayer();
+        List<UpgradeModel> GetUpgrades();
         float CalculateCurrentProfitOfShop(ShopModel shop);
         float CalculateCostOfShop(int index);
     }

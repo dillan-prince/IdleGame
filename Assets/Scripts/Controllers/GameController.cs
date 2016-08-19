@@ -24,11 +24,10 @@ namespace Assets.Scripts.Controllers
 
         void Start()
         {
-            //PlayerPrefs.DeleteAll();
+            PlayerPrefs.DeleteAll();
             Load();
             RefreshCanvas();
             InvokeRepeating("Save", 0, 1);
-            InvokeRepeating("UpdateStatistics", 0, 1);
         }
 
         #endregion
@@ -50,9 +49,14 @@ namespace Assets.Scripts.Controllers
             _gameService.PurchaseManager(index);
         }
 
-        public void PurchaseManager(GameObject button)
+        public void PurchaseUpgrade(int index)
         {
-            button.SetActive(false);
+            _gameService.PurchaseUpgrade(index);
+        }
+
+        public void DeleteGameObject(GameObject item)
+        {
+            _gameService.DeleteGameObject(item);
         }
 
         public void ChangeBuyMultiple()

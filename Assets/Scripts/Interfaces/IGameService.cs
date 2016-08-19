@@ -4,6 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using UnityEngine;
 
 namespace Assets.Scripts.Interfaces
 {
@@ -16,7 +17,9 @@ namespace Assets.Scripts.Interfaces
         void UpdateStatistics();
         void Buy(int index);
         void PurchaseManager(int index);
+        void PurchaseUpgrade(int index);
         void ChangeBuyMultiple();
+        void DeleteGameObject(GameObject item);
         IEnumerator WorkShop(int index);
     }
 }
