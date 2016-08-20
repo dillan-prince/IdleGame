@@ -13,6 +13,8 @@ namespace Assets.Scripts.Interfaces
         PlayerModel GetPlayer();
         List<UpgradeModel> GetUpgrades();
         List<ManagerModel> GetManagers();
+        List<UnlockModel> GetShopUnlocks(int index);
+        List<UnlockModel> GetGlobalUnlocks();
         double CalculateCurrentProfitOfShop(ShopModel shop);
         double CalculateCostOfShop(int index);
     }

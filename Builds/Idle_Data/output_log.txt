@@ -6,36 +6,36 @@ Direct3D:
     Vendor:   ATI
     VRAM:     2029 MB
 Begin MonoManager ReloadAssembly
-Platform assembly: C:\Users\Dillan\OneDrive\Games\Idle\Builds\Idle_Data\Managed\UnityEngine.dll (this message is harmless)
-Loading C:\Users\Dillan\OneDrive\Games\Idle\Builds\Idle_Data\Managed\UnityEngine.dll into Unity Child Domain
-Platform assembly: C:\Users\Dillan\OneDrive\Games\Idle\Builds\Idle_Data\Managed\Assembly-CSharp.dll (this message is harmless)
-Loading C:\Users\Dillan\OneDrive\Games\Idle\Builds\Idle_Data\Managed\Assembly-CSharp.dll into Unity Child Domain
-Platform assembly: C:\Users\Dillan\OneDrive\Games\Idle\Builds\Idle_Data\Managed\UnityEngine.UI.dll (this message is harmless)
-Loading C:\Users\Dillan\OneDrive\Games\Idle\Builds\Idle_Data\Managed\UnityEngine.UI.dll into Unity Child Domain
-Platform assembly: C:\Users\Dillan\OneDrive\Games\Idle\Builds\Idle_Data\Managed\UnityEngine.Networking.dll (this message is harmless)
-Loading C:\Users\Dillan\OneDrive\Games\Idle\Builds\Idle_Data\Managed\UnityEngine.Networking.dll into Unity Child Domain
-Platform assembly: C:\Users\Dillan\OneDrive\Games\Idle\Builds\Idle_Data\Managed\UnityEngine.Analytics.dll (this message is harmless)
-Loading C:\Users\Dillan\OneDrive\Games\Idle\Builds\Idle_Data\Managed\UnityEngine.Analytics.dll into Unity Child Domain
-- Completed reload, in  0.055 seconds
-Platform assembly: C:\Users\Dillan\OneDrive\Games\Idle\Builds\Idle_Data\Managed\System.Core.dll (this message is harmless)
-Platform assembly: C:\Users\Dillan\OneDrive\Games\Idle\Builds\Idle_Data\Managed\System.dll (this message is harmless)
+Platform assembly: C:\Users\Dillan\OneDrive\Games\IdleGame\Builds\Idle_Data\Managed\UnityEngine.dll (this message is harmless)
+Loading C:\Users\Dillan\OneDrive\Games\IdleGame\Builds\Idle_Data\Managed\UnityEngine.dll into Unity Child Domain
+Platform assembly: C:\Users\Dillan\OneDrive\Games\IdleGame\Builds\Idle_Data\Managed\Assembly-CSharp.dll (this message is harmless)
+Loading C:\Users\Dillan\OneDrive\Games\IdleGame\Builds\Idle_Data\Managed\Assembly-CSharp.dll into Unity Child Domain
+Platform assembly: C:\Users\Dillan\OneDrive\Games\IdleGame\Builds\Idle_Data\Managed\UnityEngine.UI.dll (this message is harmless)
+Loading C:\Users\Dillan\OneDrive\Games\IdleGame\Builds\Idle_Data\Managed\UnityEngine.UI.dll into Unity Child Domain
+Platform assembly: C:\Users\Dillan\OneDrive\Games\IdleGame\Builds\Idle_Data\Managed\UnityEngine.Networking.dll (this message is harmless)
+Loading C:\Users\Dillan\OneDrive\Games\IdleGame\Builds\Idle_Data\Managed\UnityEngine.Networking.dll into Unity Child Domain
+Platform assembly: C:\Users\Dillan\OneDrive\Games\IdleGame\Builds\Idle_Data\Managed\UnityEngine.Analytics.dll (this message is harmless)
+Loading C:\Users\Dillan\OneDrive\Games\IdleGame\Builds\Idle_Data\Managed\UnityEngine.Analytics.dll into Unity Child Domain
+- Completed reload, in  0.091 seconds
+Platform assembly: C:\Users\Dillan\OneDrive\Games\IdleGame\Builds\Idle_Data\Managed\System.Core.dll (this message is harmless)
+Platform assembly: C:\Users\Dillan\OneDrive\Games\IdleGame\Builds\Idle_Data\Managed\System.dll (this message is harmless)
 desktop: 1920x1080 60Hz; virtual: 1920x1080 at 0,0
 <RI> Initializing input.
 <RI> Input initialized.
 <RI> Initialized touch support.
-UnloadTime: 0.900533 ms
+UnloadTime: 0.902000 ms
 Unloading 5 Unused Serialized files (Serialized files now loaded: 0)
-UnloadTime: 4.939733 ms
+UnloadTime: 5.011600 ms
 
-Unloading 3 unused Assets to reduce memory usage. Loaded Objects now: 192.
-Total: 0.204844 ms (FindLiveObjects: 0.014177 ms CreateObjectMapping: 0.015644 ms MarkObjects: 0.164755 ms  DeleteObjects: 0.004888 ms)
+Unloading 3 unused Assets to reduce memory usage. Loaded Objects now: 198.
+Total: 0.255688 ms (FindLiveObjects: 0.030800 ms CreateObjectMapping: 0.034711 ms MarkObjects: 0.177955 ms  DeleteObjects: 0.004888 ms)
 
-Unloading 3 Unused Serialized files (Serialized files now loaded: 0)
-UnloadTime: 0.657066 ms
+Unloading 4 Unused Serialized files (Serialized files now loaded: 0)
+UnloadTime: 0.489866 ms
 
-Unloading 1 unused Assets to reduce memory usage. Loaded Objects now: 341.
-Total: 0.567111 ms (FindLiveObjects: 0.045466 ms CreateObjectMapping: 0.043511 ms MarkObjects: 0.463955 ms  DeleteObjects: 0.004888 ms)
+Unloading 1 unused Assets to reduce memory usage. Loaded Objects now: 592.
+Total: 0.625777 ms (FindLiveObjects: 0.027377 ms CreateObjectMapping: 0.016133 ms MarkObjects: 0.569555 ms  DeleteObjects: 0.007333 ms)
 
 Setting up 2 worker threads for Enlighten.
-  Thread -> id: 394c -> priority: 1 
-  Thread -> id: 366c -> priority: 1 
+  Thread -> id: 1c2c -> priority: 1 
+  Thread -> id: 3170 -> priority: 1 

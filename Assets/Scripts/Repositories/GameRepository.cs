@@ -15,16 +15,20 @@ namespace Assets.Scripts.Repositories
         private static List<ShopModel> _shops;
         private static List<UpgradeModel> _upgrades;
         private static List<ManagerModel> _managers;
+        private static List<UnlockModel> _shopUnlocks;
+        private static List<UnlockModel> _globalUnlocks;
 
         public TextAsset shopModelData;
         public TextAsset upgradeModelData;
         public TextAsset managerModelData;
+        public TextAsset unlockModelData;
 
         void Awake()
         {
-            _shops = PopulateShops();
-            _upgrades = PopulateUpgrades();
-            _managers = PopulateManagers();
+            PopulateShops();
+            PopulateUpgrades();
+            PopulateManagers();
+            PopulateUnlocks();
         }
 
         #region Public Methods
@@ -69,7 +73,6 @@ namespace Assets.Scripts.Repositories
             if (Convert.ToDouble(PlayerPrefs.GetString("player.Money", "-1")) != -1)
             {
                 player.Money = Convert.ToDouble(PlayerPrefs.GetString("player.Money"));
-                player.Money += CalculateOfflineEarnings();
 
                 player.RevenuePerSecond = Convert.ToDouble(PlayerPrefs.GetString("player.RevenuePerSecond"));
 
@@ -79,8 +82,6 @@ namespace Assets.Scripts.Repositories
                     playerManagers = playerManagers.Substring(0, playerManagers.Length - 1);
                     player.Managers = playerManagers.Split(',').Select<string, int>(int.Parse).ToList();
                 }
-                else
-                    player.Managers = new List<int>();
 
                 string playerUpgrades = PlayerPrefs.GetString("player.Upgrades");
                 if (playerUpgrades != "")
@@ -88,8 +89,6 @@ namespace Assets.Scripts.Repositories
                     playerUpgrades = playerUpgrades.Substring(0, playerUpgrades.Length - 1);
                     player.Upgrades = playerUpgrades.Split(',').Select<string, int>(int.Parse).ToList();
                 }
-                else
-                    player.Upgrades = new List<int>();
 
                 for (int i = 0; i < player.Shops.Count; i++)
                 {
@@ -101,7 +100,7 @@ namespace Assets.Scripts.Repositories
                     player.Shops[i].Working = PlayerPrefs.GetInt("Shop[" + i.ToString() + "].Working", 0) == 1;
                     player.Shops[i].TimeRemaining = Convert.ToDouble(PlayerPrefs.GetString("Shop[" + i.ToString() + "].TimeRemaining"));
                 }
-                
+
 
                 for (int i = 0; i < player.Upgrades.Count; i++)
                     _upgrades[player.Upgrades[i]].IsPurchased = true;
@@ -109,6 +108,7 @@ namespace Assets.Scripts.Repositories
                 for (int i = 0; i < player.Managers.Count; i++)
                     _managers[player.Managers[i]].IsPurchased = true;
 
+                player.Money += CalculateOfflineEarnings();
             }
             return player;
         }
@@ -126,6 +126,16 @@ namespace Assets.Scripts.Repositories
         public List<ManagerModel> GetManagers()
         {
             return _managers;
+        }
+
+        public List<UnlockModel> GetShopUnlocks(int index)
+        {
+            return _shopUnlocks.Where(su => su.ShopId == index).ToList();
+        }
+
+        public List<UnlockModel> GetGlobalUnlocks()
+        {
+            return _globalUnlocks;
         }
 
         public double CalculateCurrentProfitOfShop(ShopModel shop)
@@ -187,23 +197,25 @@ namespace Assets.Scripts.Repositories
         private PlayerModel GenerateNewPlayer()
         {
             PlayerModel player = new PlayerModel();
-            player.Money = 0;
+            player.Money = 1e15;
             player.GlobalMultiplier = 1;
             player.RevenuePerSecond = 0;
             player.Shops = _shops;
+            player.Managers = new List<int>();
+            player.Upgrades = new List<int>();
 
             return player;
         }
 
-        private List<ShopModel> PopulateShops()
+        private void PopulateShops()
         {
-            List<ShopModel> shopModels = new List<ShopModel>();
+            _shops = new List<ShopModel>();
 
             string[] lines = shopModelData.text.Split('\n');
             for (int i = 1; i < lines.Length - 1; i++)
             {
                 string[] values = lines[i].Split(',');
-                shopModels.Add(new ShopModel
+                _shops.Add(new ShopModel
                 {
                     Name = values[0],
                     GrowthRate = Convert.ToDouble(values[1]),
@@ -217,19 +229,17 @@ namespace Assets.Scripts.Repositories
                     Id = Convert.ToInt32(values[9])
                 });
             }
-
-            return shopModels;
         }
 
-        private List<UpgradeModel> PopulateUpgrades()
+        private void PopulateUpgrades()
         {
-            List<UpgradeModel> upgradeModels = new List<UpgradeModel>();
+            _upgrades = new List<UpgradeModel>();
 
             string[] lines = upgradeModelData.text.Split('\n');
             for (int i = 1; i < lines.Length - 1; i++)
             {
                 string[] values = lines[i].Split(',');
-                upgradeModels.Add(new UpgradeModel
+                _upgrades.Add(new UpgradeModel
                 {
                     Name = values[0],
                     Id = Convert.ToInt32(values[1]),
@@ -238,19 +248,17 @@ namespace Assets.Scripts.Repositories
                     Cost = Convert.ToDouble(values[4])
                 });
             }
-
-            return upgradeModels;
         }
 
-        private List<ManagerModel> PopulateManagers()
+        private void PopulateManagers()
         {
-            List<ManagerModel> managerModels = new List<ManagerModel>();
+            _managers = new List<ManagerModel>();
 
             string[] lines = managerModelData.text.Split('\n');
             for (int i = 1; i < lines.Length - 1; i++)
             {
                 string[] values = lines[i].Split(',');
-                managerModels.Add(new ManagerModel
+                _managers.Add(new ManagerModel
                 {
                     Name = values[0],
                     Id = Convert.ToInt32(values[1]),
@@ -259,8 +267,28 @@ namespace Assets.Scripts.Repositories
                     Cost = Convert.ToDouble(values[4])
                 });
             }
+        }
 
-            return managerModels;
+        private void PopulateUnlocks()
+        {
+            _shopUnlocks = new List<UnlockModel>();
+
+            string[] lines = unlockModelData.text.Split('\n');
+            for (int i = 1; i < lines.Length - 1; i++)
+            {
+                string[] values = lines[i].Split(',');
+                _shopUnlocks.Add(new UnlockModel
+                {
+                    ShopId = Convert.ToInt32(values[0]),
+                    AffectsShopId = Convert.ToInt32(values[1]),
+                    Level = Convert.ToInt32(values[2]),
+                    ProfitMultiplier = Convert.ToDouble(values[3]),
+                    SpeedMultiplier = Convert.ToDouble(values[4])
+                });
+            }
+
+            _globalUnlocks = _shopUnlocks.Where(su => su.ShopId == 10).ToList();
+            _shopUnlocks = _shopUnlocks.Where(su => su.ShopId != 10).ToList();
         }
         #endregion
     }

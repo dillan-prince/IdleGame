@@ -8,6 +8,7 @@ namespace Assets.Scripts.Models
     {
         public bool AudioOn { get; set; }
         public double Money { get; set; }
+        public double AccumulativeMoney { get; set; }
         public int BuyMultiple { get; set; }
         public double GlobalMultiplier { get; set; }
         public double RevenuePerSecond { get; set; }

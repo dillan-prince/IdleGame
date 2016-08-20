@@ -76,6 +76,7 @@
     <Compile Include="Assets\Scripts\Models\ManagerModel.cs" />
     <Compile Include="Assets\Scripts\Models\PlayerModel.cs" />
     <Compile Include="Assets\Scripts\Models\ShopModel.cs" />
+    <Compile Include="Assets\Scripts\Models\UnlockModel.cs" />
     <Compile Include="Assets\Scripts\Models\UpgradeModel.cs" />
     <Compile Include="Assets\Scripts\Repositories\GameRepository.cs" />
     <Compile Include="Assets\Scripts\Services\GameService.cs" />

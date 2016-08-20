@@ -19,19 +19,14 @@ namespace Assets.Scripts.Services
         public Text[] _timeRemainings;
         public Text[] _shopAmountOwneds;
         public Text[] _shopCosts;
-        public Text[] _shopMultipliers;
 
         public Text _playerMoney;
         public Text _buyMultipleButtonText;
-        public Text _incomePerSecond;
-        public Text _globalMultiplier;
 
         public GameObject[] _menus;
 
         public GameObject _menuButton;
         public GameObject _statisticsExpandableList;
-
-        private static int openStatisticsList = -1;
 
         void Awake()
         {
@@ -80,6 +75,8 @@ namespace Assets.Scripts.Services
             {
                 player.Money -= _gameRepository.CalculateCostOfShop(index);
                 player.Shops[index].NumberOwned += player.BuyMultiple;
+                CheckForUnlocks(index, player.Shops[index].NumberOwned - player.BuyMultiple);
+
                 UpdateAmountOwned();
                 UpdateCostOfShops();
                 UpdatePlayerMoney();
@@ -197,6 +194,56 @@ namespace Assets.Scripts.Services
         #endregion
 
         #region Private Methods
+        private void CheckForUnlocks(int index, int oldLevel)
+        {
+            PlayerModel player = _gameRepository.GetPlayer();
+            List<UnlockModel> shopUnlocks = _gameRepository.GetShopUnlocks(index);
+            List<UnlockModel> shopUnlocksReached = shopUnlocks.Where(su => su.Level > oldLevel && su.Level <= player.Shops[index].NumberOwned).ToList();
+            for (int i = 0; i < shopUnlocksReached.Count; i++)
+            {
+                UnlockModel shopUnlockReached = shopUnlocksReached[i];
+                player.Shops[shopUnlockReached.AffectsShopId].Multiplier *= shopUnlockReached.ProfitMultiplier;
+                player.Shops[shopUnlockReached.AffectsShopId].TimeToComplete *= shopUnlockReached.SpeedMultiplier;
+
+                if (shopUnlockReached.SpeedMultiplier != 1)
+                {
+                    player.Shops[shopUnlockReached.AffectsShopId].TimeRemaining -= player.Shops[shopUnlockReached.AffectsShopId].TimeToComplete;
+                    if (player.Shops[shopUnlockReached.AffectsShopId].TimeRemaining < 0)
+                    {
+                        player.Money += _gameRepository.CalculateCurrentProfitOfShop(player.Shops[shopUnlockReached.AffectsShopId]);
+                        player.Shops[shopUnlockReached.AffectsShopId].TimeRemaining = player.Shops[shopUnlockReached.AffectsShopId].TimeToComplete - Math.Abs(player.Shops[shopUnlockReached.AffectsShopId].TimeRemaining);
+                    }
+                }
+            }
+
+            int lowestLevel = player.Shops.Min(shop => shop.NumberOwned);
+            List<ShopModel> shopsAtLowestLevel = player.Shops.Where(shop => shop.NumberOwned == lowestLevel).ToList();
+            if (shopsAtLowestLevel.Any(shop => shop.Id == index))
+            {
+                List<UnlockModel> globalUnlocks = _gameRepository.GetGlobalUnlocks();
+                List<UnlockModel> globalUnlocksReached = globalUnlocks.Where(gu => gu.Level > oldLevel && gu.Level <= player.Shops[index].NumberOwned).ToList();
+                for (int i = 0; i < globalUnlocksReached.Count; i++)
+                {
+                    UnlockModel globalUnlockReached = globalUnlocksReached[i];
+                    foreach (ShopModel shop in player.Shops)
+                    {
+                        shop.Multiplier *= globalUnlockReached.ProfitMultiplier;
+                        shop.TimeToComplete *= globalUnlockReached.SpeedMultiplier;
+
+                        if (globalUnlockReached.SpeedMultiplier != 1)
+                        {
+                            shop.TimeRemaining -= shop.TimeToComplete;
+                            if (shop.TimeRemaining < 0)
+                            {
+                                player.Money += _gameRepository.CalculateCurrentProfitOfShop(shop);
+                                shop.TimeRemaining = shop.TimeToComplete - Math.Abs(shop.TimeRemaining);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
         private void UpdateCostOfShops()
         {
             for (int i = 0; i < _shopCosts.Length; i++)
@@ -216,23 +263,23 @@ namespace Assets.Scripts.Services
         private void UpdateTimeRemaining(ShopModel shop)
         {
             TimeSpan time = TimeSpan.FromSeconds(shop.TimeRemaining);
-            _timeRemainings[shop.Id].text = string.Format("{0}:{1}:{2}.{3}", time.Hours, time.Minutes, time.Seconds, time.Milliseconds);
+            _timeRemainings[shop.Id].text = shop.TimeToComplete > .01 ? string.Format("{0}:{1}:{2}.{3}", time.Hours, time.Minutes, time.Seconds, time.Milliseconds) : "Really fast!";
         }
 
         private void UpdatePlayerMoney()
         {
             PlayerModel player = _gameRepository.GetPlayer();
-
-            if (player.Money > 1e6)
-                _playerMoney.text = player.Money.ToString("e2");
-            else
-                _playerMoney.text = player.Money.ToString("C");
+            _playerMoney.text = string.Format("${0:e2}", player.Money);
         }
 
         private void UpdateStatistics()
         {
             UpdateRevenuePerSecond();
             PlayerModel player = _gameRepository.GetPlayer();
+            bool isStatsMenuOpen = _menus[2].activeSelf;
+
+            if (!isStatsMenuOpen)
+                _menus[2].SetActive(true);
 
             GameObject[] oldStats = GameObject.FindGameObjectsWithTag("Statistics Expandable List");
             foreach (GameObject oldStat in oldStats)
@@ -240,6 +287,9 @@ namespace Assets.Scripts.Services
                 oldStat.GetComponentInChildren<Button>().onClick.RemoveAllListeners();
                 Destroy(oldStat);
             }
+
+            if (!isStatsMenuOpen)
+                _menus[2].SetActive(false);
 
             GameObject playerStatistics = Instantiate(_statisticsExpandableList);
             playerStatistics.transform.SetParent(_menus[2].transform, false);
