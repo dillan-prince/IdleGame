@@ -29,6 +29,9 @@ namespace Assets.Scripts.Services
         public GameObject[] _menus;
 
         public GameObject _menuButton;
+        public GameObject _statisticsExpandableList;
+
+        private static int openStatisticsList = -1;
 
         void Awake()
         {
@@ -70,15 +73,6 @@ namespace Assets.Scripts.Services
             UpdateUpgrades();
         }
 
-        public void UpdateStatistics()
-        {
-            PlayerModel player = _gameRepository.GetPlayer();
-            _incomePerSecond.text = "Income Per Second: " + player.RevenuePerSecond.ToString("e2");
-            _globalMultiplier.text = "Global Multiplier: " + player.GlobalMultiplier.ToString();
-            for (int i = 0; i < _shopMultipliers.Length; i++)
-                _shopMultipliers[i].text = player.Shops[i].Name + " Multiplier: " + player.Shops[i].Multiplier.ToString();
-        }
-
         public void Buy(int index)
         {
             PlayerModel player = _gameRepository.GetPlayer();
@@ -105,13 +99,16 @@ namespace Assets.Scripts.Services
                 player.Shops[manager.ShopId].InitialCost *= manager.Multiplier;
 
                 if (index < 10)
+                {
                     player.Shops[index].Manager = true;
-                
+                    UpdateStatistics();
+                }
 
                 manager.IsPurchased = true;
+                player.Money -= manager.Cost;
                 player.Managers.Add(index);
+                UpdatePlayerMoney();
                 UpdateManagers();
-                UpdateStatistics();
             }
         }
 
@@ -124,15 +121,14 @@ namespace Assets.Scripts.Services
             if (player.Money >= upgrade.Cost)
             {
                 if (upgrade.ShopId == 10)
-                {
-                    foreach (ShopModel shop in player.Shops)
-                        shop.Multiplier *= upgrade.Multiplier;
-                }
+                    player.GlobalMultiplier *= upgrade.Multiplier;
                 else
                     player.Shops[upgrade.ShopId].Multiplier *= upgrade.Multiplier;
 
                 upgrade.IsPurchased = true;
+                player.Money -= upgrade.Cost;
                 player.Upgrades.Add(index);
+                UpdatePlayerMoney();
                 UpdateUpgrades();
                 UpdateStatistics();
             }
@@ -233,6 +229,47 @@ namespace Assets.Scripts.Services
                 _playerMoney.text = player.Money.ToString("C");
         }
 
+        private void UpdateStatistics()
+        {
+            UpdateRevenuePerSecond();
+            PlayerModel player = _gameRepository.GetPlayer();
+
+            GameObject[] oldStats = GameObject.FindGameObjectsWithTag("Statistics Expandable List");
+            foreach (GameObject oldStat in oldStats)
+            {
+                oldStat.GetComponentInChildren<Button>().onClick.RemoveAllListeners();
+                Destroy(oldStat);
+            }
+
+            GameObject playerStatistics = Instantiate(_statisticsExpandableList);
+            playerStatistics.transform.SetParent(_menus[2].transform, false);
+            playerStatistics.GetComponent<Text>().text = "Player";
+
+            Button playerStatisticsButton = playerStatistics.GetComponentInChildren<Button>();
+            playerStatisticsButton.onClick.AddListener(() =>
+            {
+                Vector3 rotationVector = playerStatisticsButton.transform.rotation.eulerAngles;
+                CloseAllStatisticsLists();
+                if (rotationVector.z == 90)
+                {
+                    MoveStatsListsDown(0);
+                    rotationVector.z = 0;
+                    playerStatisticsButton.transform.rotation = Quaternion.Euler(rotationVector);
+                    playerStatistics.GetComponentsInChildren<Text>()[1].text = string.Format("Global Multiplier: {0:e2}\nIncome Per Second: ${1:e2}", player.GlobalMultiplier, player.RevenuePerSecond);
+                }
+            });
+
+            for (int i = 1; i <= player.Shops.Count; i++)
+            {
+                GameObject shopStatistics = Instantiate(_statisticsExpandableList);
+                shopStatistics.transform.SetParent(_menus[2].transform, false);
+                shopStatistics.transform.localPosition = new Vector2(25, 300 - 40 * i);
+                shopStatistics.GetComponent<Text>().text = player.Shops[i - 1].Name;
+                AddStatisticsListener(shopStatistics, i);
+            }
+
+        }
+
         private void UpdateRevenuePerSecond()
         {
             PlayerModel player = _gameRepository.GetPlayer();
@@ -303,6 +340,55 @@ namespace Assets.Scripts.Services
         private void AddManagerListener(GameObject manager, int index)
         {
             manager.GetComponent<Button>().onClick.AddListener(() => { PurchaseManager(index); });
+        }
+
+        private void AddStatisticsListener(GameObject stat, int index)
+        {
+            PlayerModel player = _gameRepository.GetPlayer();
+            ShopModel shop = player.Shops[index - 1];
+            Button statButton = stat.GetComponentInChildren<Button>();
+            statButton.onClick.AddListener(() =>
+            {
+                Vector3 rotationVector = statButton.transform.rotation.eulerAngles;
+                CloseAllStatisticsLists();
+                if (rotationVector.z == 90)
+                {
+                    MoveStatsListsDown(index);
+                    rotationVector.z = 0;
+                    statButton.transform.rotation = Quaternion.Euler(rotationVector);
+                    stat.GetComponentsInChildren<Text>()[1].text = string.Format("Multiplier: {0:e2}\nProfit: ${1:e2} \nSpeed: {2:e2} (sec)\nIncome Per Second: ${3:e2}", shop.Multiplier, _gameRepository.CalculateCurrentProfitOfShop(shop), shop.TimeToComplete, shop.RevenuePerSecond);
+                }
+            });
+        }
+
+        private void CloseAllStatisticsLists()
+        {
+            GameObject[] stats = GameObject.FindGameObjectsWithTag("Statistics Expandable List");
+            for (int i = 0; i < stats.Length; i++)
+            {
+                GameObject stat = stats[i];
+                stat.transform.localPosition = new Vector2(25, 300 - 40 * i);
+                Button statButton = stat.GetComponentInChildren<Button>();
+                Vector3 statButtonRotation = statButton.transform.rotation.eulerAngles;
+                if (statButtonRotation.z == 0)
+                {
+                    statButtonRotation.z = 90;
+                    statButton.transform.rotation = Quaternion.Euler(statButtonRotation);
+                    stat.GetComponentsInChildren<Text>()[1].text = string.Empty;
+                }
+            }
+        }
+
+        private void MoveStatsListsDown(int index)
+        {
+            GameObject[] stats = GameObject.FindGameObjectsWithTag("Statistics Expandable List");
+            for (int i = index + 1; i < stats.Length; i++)
+            {
+                GameObject stat = stats[i];
+                Vector3 statPosition = stat.transform.localPosition;
+                statPosition.y -= 100;
+                stat.transform.localPosition = statPosition;
+            }
         }
 
         private IEnumerator WorkPartialShop(int index)

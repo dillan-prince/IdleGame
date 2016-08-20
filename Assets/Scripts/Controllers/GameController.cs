@@ -24,6 +24,7 @@ namespace Assets.Scripts.Controllers
 
         void Start()
         {
+            Load();
             HideMenus();
             RefreshCanvas();
             InvokeRepeating("Save", 0, 1);

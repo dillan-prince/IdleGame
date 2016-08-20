@@ -25,7 +25,6 @@ namespace Assets.Scripts.Repositories
             _shops = PopulateShops();
             _upgrades = PopulateUpgrades();
             _managers = PopulateManagers();
-            Load();
         }
 
         #region Public Methods
@@ -70,17 +69,25 @@ namespace Assets.Scripts.Repositories
             if (Convert.ToDouble(PlayerPrefs.GetString("player.Money", "-1")) != -1)
             {
                 player.Money = Convert.ToDouble(PlayerPrefs.GetString("player.Money"));
+                player.Money += CalculateOfflineEarnings();
+
                 player.RevenuePerSecond = Convert.ToDouble(PlayerPrefs.GetString("player.RevenuePerSecond"));
+
                 string playerManagers = PlayerPrefs.GetString("player.Managers");
                 if (playerManagers != "")
+                {
+                    playerManagers = playerManagers.Substring(0, playerManagers.Length - 1);
                     player.Managers = playerManagers.Split(',').Select<string, int>(int.Parse).ToList();
+                }
                 else
                     player.Managers = new List<int>();
 
-
                 string playerUpgrades = PlayerPrefs.GetString("player.Upgrades");
                 if (playerUpgrades != "")
+                {
+                    playerUpgrades = playerUpgrades.Substring(0, playerUpgrades.Length - 1);
                     player.Upgrades = playerUpgrades.Split(',').Select<string, int>(int.Parse).ToList();
+                }
                 else
                     player.Upgrades = new List<int>();
 
@@ -94,9 +101,7 @@ namespace Assets.Scripts.Repositories
                     player.Shops[i].Working = PlayerPrefs.GetInt("Shop[" + i.ToString() + "].Working", 0) == 1;
                     player.Shops[i].TimeRemaining = Convert.ToDouble(PlayerPrefs.GetString("Shop[" + i.ToString() + "].TimeRemaining"));
                 }
-
-                double offlineEarnings = CalculateOfflineEarnings();
-                player.Money += offlineEarnings;
+                
 
                 for (int i = 0; i < player.Upgrades.Count; i++)
                     _upgrades[player.Upgrades[i]].IsPurchased = true;

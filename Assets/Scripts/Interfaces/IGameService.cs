@@ -14,7 +14,6 @@ namespace Assets.Scripts.Interfaces
         void Load();
         void HideMenus();
         void RefreshCanvas();
-        void UpdateStatistics();
         void Buy(int index);
         void PurchaseManager(int index);
         void PurchaseUpgrade(int index);
