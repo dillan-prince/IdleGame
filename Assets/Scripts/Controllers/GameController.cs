@@ -18,14 +18,13 @@ namespace Assets.Scripts.Controllers
 
         void Awake()
         {
+            //PlayerPrefs.DeleteAll();
             _gameService = GetComponent<GameService>();
-            HideMenus();
         }
 
         void Start()
         {
-            PlayerPrefs.DeleteAll();
-            Load();
+            HideMenus();
             RefreshCanvas();
             InvokeRepeating("Save", 0, 1);
         }
@@ -42,21 +41,6 @@ namespace Assets.Scripts.Controllers
         public void WorkShop(int index)
         {
             StartCoroutine(_gameService.WorkShop(index));
-        }
-
-        public void PurchaseManager(int index)
-        {
-            _gameService.PurchaseManager(index);
-        }
-
-        public void PurchaseUpgrade(int index)
-        {
-            _gameService.PurchaseUpgrade(index);
-        }
-
-        public void DeleteGameObject(GameObject item)
-        {
-            _gameService.DeleteGameObject(item);
         }
 
         public void ChangeBuyMultiple()

@@ -19,7 +19,6 @@ namespace Assets.Scripts.Interfaces
         void PurchaseManager(int index);
         void PurchaseUpgrade(int index);
         void ChangeBuyMultiple();
-        void DeleteGameObject(GameObject item);
         IEnumerator WorkShop(int index);
     }
 }

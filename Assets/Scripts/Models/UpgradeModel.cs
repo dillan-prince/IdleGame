@@ -10,8 +10,8 @@ namespace Assets.Scripts.Models
         public string Name { get; set; }
         public int Id { get; set; }
         public int ShopId { get; set; }
-        public float Multiplier { get; set; }
-        public float Cost { get; set; }
+        public double Multiplier { get; set; }
+        public double Cost { get; set; }
         public bool IsPurchased { get; set; }
     }
 }

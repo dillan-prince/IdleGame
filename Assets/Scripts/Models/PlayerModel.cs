@@ -7,10 +7,12 @@ namespace Assets.Scripts.Models
     public class PlayerModel
     {
         public bool AudioOn { get; set; }
-        public float Money { get; set; }
+        public double Money { get; set; }
         public int BuyMultiple { get; set; }
-        public float GlobalMultiplier { get; set; }
-        public float RevenuePerSecond { get; set; }
+        public double GlobalMultiplier { get; set; }
+        public double RevenuePerSecond { get; set; }
+        public List<int> Upgrades { get; set; }
+        public List<int> Managers { get; set; }
         public List<ShopModel> Shops { get; set; }
     }
 }

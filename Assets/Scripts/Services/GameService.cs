@@ -27,9 +27,8 @@ namespace Assets.Scripts.Services
         public Text _globalMultiplier;
 
         public GameObject[] _menus;
-        public GameObject[] _managers;
 
-        public GameObject _upgrade;
+        public GameObject _menuButton;
 
         void Awake()
         {
@@ -87,28 +86,40 @@ namespace Assets.Scripts.Services
             {
                 player.Money -= _gameRepository.CalculateCostOfShop(index);
                 player.Shops[index].NumberOwned += player.BuyMultiple;
-                RefreshCanvas();
+                UpdateAmountOwned();
+                UpdateCostOfShops();
+                UpdatePlayerMoney();
+                UpdateRevenuePerSecond();
+                UpdateStatistics();
             }
         }
 
         public void PurchaseManager(int index)
         {
             PlayerModel player = _gameRepository.GetPlayer();
-            player.Shops[index % 10].Managers = index / 10 + 1;
+            List<ManagerModel> managers = _gameRepository.GetManagers();
+            ManagerModel manager = managers.FirstOrDefault(m => m.Id == index);
 
-            if (player.Shops[index % 10].Managers == 2)
-                player.Shops[index % 10].InitialCost *= .9f;
-            else if (player.Shops[index % 10].Managers == 3)
-                player.Shops[index % 10].InitialCost *= .00001f;
+            if (player.Money > manager.Cost)
+            {
+                player.Shops[manager.ShopId].InitialCost *= manager.Multiplier;
 
-            RefreshCanvas();
+                if (index < 10)
+                    player.Shops[index].Manager = true;
+                
+
+                manager.IsPurchased = true;
+                player.Managers.Add(index);
+                UpdateManagers();
+                UpdateStatistics();
+            }
         }
 
         public void PurchaseUpgrade(int index)
         {
             PlayerModel player = _gameRepository.GetPlayer();
             List<UpgradeModel> upgrades = _gameRepository.GetUpgrades();
-            UpgradeModel upgrade = upgrades[index];
+            UpgradeModel upgrade = upgrades.FirstOrDefault(u => u.Id == index);
 
             if (player.Money >= upgrade.Cost)
             {
@@ -119,11 +130,12 @@ namespace Assets.Scripts.Services
                 }
                 else
                     player.Shops[upgrade.ShopId].Multiplier *= upgrade.Multiplier;
+
+                upgrade.IsPurchased = true;
+                player.Upgrades.Add(index);
+                UpdateUpgrades();
+                UpdateStatistics();
             }
-
-            upgrade.IsPurchased = true;
-
-            UpdateUpgrades();
         }
 
         public void ChangeBuyMultiple()
@@ -153,11 +165,6 @@ namespace Assets.Scripts.Services
             UpdateCostOfShops();
         }
 
-        public void DeleteGameObject(GameObject item)
-        {
-            item.SetActive(false);
-        }
-
         public IEnumerator WorkShop(int index)
         {
             PlayerModel player = _gameRepository.GetPlayer();
@@ -176,7 +183,7 @@ namespace Assets.Scripts.Services
                     yield return null;
                     watch.Stop();
 
-                    shop.TimeRemaining -= (float)watch.Elapsed.TotalSeconds;
+                    shop.TimeRemaining -= watch.Elapsed.TotalSeconds;
                 } while (shop.TimeRemaining > 0);
 
                 player.Money += _gameRepository.CalculateCurrentProfitOfShop(shop);
@@ -187,7 +194,7 @@ namespace Assets.Scripts.Services
                 UpdatePlayerMoney();
                 UpdateTimeRemaining(shop);
 
-                if (shop.Managers >= 1)
+                if (shop.Manager)
                     StartCoroutine(WorkShop(index));
             }
         }
@@ -198,11 +205,8 @@ namespace Assets.Scripts.Services
         {
             for (int i = 0; i < _shopCosts.Length; i++)
             {
-                float cost = _gameRepository.CalculateCostOfShop(i);
-                if (cost > 1e6)
-                    _shopCosts[i].text = " $" + cost.ToString("e2");
-                else
-                    _shopCosts[i].text = " " + cost.ToString("C");
+                double cost = _gameRepository.CalculateCostOfShop(i);
+                _shopCosts[i].text = " $" + cost.ToString("e2");
             }
         }
 
@@ -236,48 +240,69 @@ namespace Assets.Scripts.Services
             for (int i = 0; i < player.Shops.Count; i++)
             {
                 player.Shops[i].RevenuePerSecond = _gameRepository.CalculateCurrentProfitOfShop(player.Shops[i]) / player.Shops[i].TimeToComplete;
-                if (player.Shops[i].Managers >= 1)
+                if (player.Shops[i].Manager)
                     player.RevenuePerSecond += player.Shops[i].RevenuePerSecond;
             }
         }
 
         private void UpdateManagers()
         {
-            PlayerModel player = _gameRepository.GetPlayer();
-            List<int> managersToShow = Enumerable.Range(0, _managers.Length).ToList();
-            for (int i = 0; i < player.Shops.Count; i++)
+            GameObject[] oldManagers = GameObject.FindGameObjectsWithTag("Manager Button");
+            foreach (GameObject oldManager in oldManagers)
             {
-                for (int j = 0; j < player.Shops[i].Managers; j++)
-                    managersToShow.Remove(i + 10 * j);
+                oldManager.GetComponent<Button>().onClick.RemoveAllListeners();
+                Destroy(oldManager);
             }
 
-            foreach (GameObject manager in _managers)
-                manager.SetActive(false);
+            List<ManagerModel> managers = _gameRepository.GetManagers();
+            List<ManagerModel> managersToShow = managers.Where(m => !m.IsPurchased).OrderBy(m => m.Cost).Take(6).ToList();
 
-            for (int i = 0; i < Math.Min(6, managersToShow.Count); i++)
+            for (int i = 0; i < managersToShow.Count; i++)
             {
-                _managers[managersToShow[i]].SetActive(true);
-                _managers[managersToShow[i]].transform.localPosition = new Vector2(0, 210 - 70 * i);
+                GameObject manager = Instantiate(_menuButton);
+
+                manager.transform.SetParent(_menus[0].transform, false);
+                manager.transform.localPosition = new Vector2(0, 210 - 70 * i);
+                manager.GetComponentInChildren<Text>().text = string.Format("{0}\n${1:e2}", managersToShow[i].Name, managersToShow[i].Cost);
+                manager.tag = "Manager Button";
+
+                AddManagerListener(manager, managersToShow[i].Id);
             }
         }
 
         private void UpdateUpgrades()
         {
+            GameObject[] oldUpgrades = GameObject.FindGameObjectsWithTag("Upgrade Button");
+            foreach (GameObject oldUpgrade in oldUpgrades)
+            {
+                oldUpgrade.GetComponent<Button>().onClick.RemoveAllListeners();
+                Destroy(oldUpgrade);
+            }
+
             List<UpgradeModel> upgrades = _gameRepository.GetUpgrades();
             List<UpgradeModel> upgradesToShow = upgrades.Where(u => !u.IsPurchased).OrderBy(u => u.Cost).Take(6).ToList();
 
             for (int i = 0; i < upgradesToShow.Count; i++)
             {
-                GameObject upgradeButton = Instantiate(_upgrade);
+                GameObject upgrade = Instantiate(_menuButton);
 
-                upgradeButton.transform.SetParent(_menus[2].transform, false);
-                upgradeButton.transform.localPosition = new Vector2(0, 210 - 70 * i);
-                upgradeButton.GetComponentInChildren<Text>().text = upgradesToShow[i].Name;
+                upgrade.transform.SetParent(_menus[1].transform, false);
+                upgrade.transform.localPosition = new Vector2(0, 210 - 70 * i);
+                upgrade.GetComponentInChildren<Text>().text = string.Format("{0}\n${1:e2}", upgradesToShow[i].Name, upgradesToShow[i].Cost);
+                upgrade.tag = "Upgrade Button";
 
-                upgradeButton.SendMessage("PurchaseUpgrade", upgradesToShow[i].Id);
-                upgradeButton.SendMessage("DeleteGameObject", upgradeButton);
+                AddUpgradeListener(upgrade, upgradesToShow[i].Id);
             }
+        }
 
+        private void AddUpgradeListener(GameObject upgrade, int index)
+        {
+            upgrade.GetComponent<Button>().onClick.AddListener(() => { PurchaseUpgrade(index); });
+        }
+
+        private void AddManagerListener(GameObject manager, int index)
+        {
+            manager.GetComponent<Button>().onClick.AddListener(() => { PurchaseManager(index); });
         }
 
         private IEnumerator WorkPartialShop(int index)
@@ -293,7 +318,7 @@ namespace Assets.Scripts.Services
                 yield return null;
                 watch.Stop();
 
-                shop.TimeRemaining -= (float)watch.Elapsed.TotalSeconds;
+                shop.TimeRemaining -= watch.Elapsed.TotalSeconds;
             } while (shop.TimeRemaining > 0);
 
             player.Money += _gameRepository.CalculateCurrentProfitOfShop(shop);
@@ -303,7 +328,7 @@ namespace Assets.Scripts.Services
             UpdatePlayerMoney();
             UpdateTimeRemaining(shop);
 
-            if (shop.Managers >= 1)
+            if (shop.Manager)
                 StartCoroutine(WorkShop(index));
         }
         #endregion
