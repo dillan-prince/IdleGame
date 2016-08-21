@@ -8,6 +8,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 namespace Assets.Scripts.Services
@@ -26,6 +27,7 @@ namespace Assets.Scripts.Services
         public GameObject[] _menus;
 
         public GameObject _menuButton;
+        public GameObject _tooltip;
         public GameObject _statisticsExpandableList;
 
         void Awake()
@@ -354,6 +356,7 @@ namespace Assets.Scripts.Services
                 manager.tag = "Manager Button";
 
                 AddManagerListener(manager, managersToShow[i].Id);
+                AddTooltipForManagers(manager, managersToShow[i]);
             }
         }
 
@@ -379,7 +382,44 @@ namespace Assets.Scripts.Services
                 upgrade.tag = "Upgrade Button";
 
                 AddUpgradeListener(upgrade, upgradesToShow[i].Id);
+                AddTooltipForUpgrades(upgrade, upgradesToShow[i]);
             }
+        }
+
+        private void AddManagerListener(GameObject manager, int index)
+        {
+            manager.GetComponent<Button>().onClick.AddListener(() => { PurchaseManager(index); });
+        }
+
+        private void AddTooltipForManagers(GameObject gameObj, ManagerModel manager)
+        {
+            PlayerModel player = _gameRepository.GetPlayer();
+            EventTrigger trigger = gameObj.GetComponent<EventTrigger>();
+            EventTrigger.Entry pointerEnter = new EventTrigger.Entry();
+            pointerEnter.eventID = EventTriggerType.PointerEnter;
+            pointerEnter.callback.AddListener((eventData) =>
+            {
+                GameObject tooltip = Instantiate(_tooltip);
+                tooltip.transform.SetParent(gameObj.transform.parent);
+                tooltip.transform.localPosition = new Vector2(260, gameObj.transform.localPosition.y);
+                Text tooltipText = tooltip.GetComponentInChildren<Text>();
+                if (manager.Id < 10)
+                    tooltipText.text = string.Format("Takes over operations of {0}. You can take a break!", player.Shops[manager.ShopId].Name);
+                else if (manager.Id < 20)
+                    tooltipText.text = string.Format("Reduces cost of {0} by 10%, and provides statistics!", player.Shops[manager.ShopId].Name);
+                else
+                    tooltipText.text = string.Format("Reduces cost of {0} by 99.99%!", player.Shops[manager.ShopId].Name);
+            });
+
+            EventTrigger.Entry pointerExit = new EventTrigger.Entry();
+            pointerExit.eventID = EventTriggerType.PointerExit;
+            pointerExit.callback.AddListener((eventData) =>
+            {
+                Destroy(GameObject.FindGameObjectWithTag("Tooltip"));
+            });
+
+            trigger.triggers.Add(pointerEnter);
+            trigger.triggers.Add(pointerExit);
         }
 
         private void AddUpgradeListener(GameObject upgrade, int index)
@@ -387,9 +427,30 @@ namespace Assets.Scripts.Services
             upgrade.GetComponent<Button>().onClick.AddListener(() => { PurchaseUpgrade(index); });
         }
 
-        private void AddManagerListener(GameObject manager, int index)
+        private void AddTooltipForUpgrades(GameObject gameObj, UpgradeModel upgrade)
         {
-            manager.GetComponent<Button>().onClick.AddListener(() => { PurchaseManager(index); });
+            PlayerModel player = _gameRepository.GetPlayer();
+            EventTrigger trigger = gameObj.GetComponent<EventTrigger>();
+            EventTrigger.Entry pointerEnter = new EventTrigger.Entry();
+            pointerEnter.eventID = EventTriggerType.PointerEnter;
+            pointerEnter.callback.AddListener((eventData) =>
+            {
+                GameObject tooltip = Instantiate(_tooltip);
+                tooltip.transform.SetParent(gameObj.transform.parent);
+                tooltip.transform.localPosition = new Vector2(260, gameObj.transform.localPosition.y);
+                Text tooltipText = tooltip.GetComponentInChildren<Text>();
+                tooltipText.text = string.Format("Multiplies profits of\n{0}\nby {1}.", upgrade.ShopId == 10 ? "all shops" : player.Shops[upgrade.ShopId].Name, upgrade.Multiplier);
+            });
+
+            EventTrigger.Entry pointerExit = new EventTrigger.Entry();
+            pointerExit.eventID = EventTriggerType.PointerExit;
+            pointerExit.callback.AddListener((eventData) =>
+            {
+                Destroy(GameObject.FindGameObjectWithTag("Tooltip"));
+            });
+
+            trigger.triggers.Add(pointerEnter);
+            trigger.triggers.Add(pointerExit);
         }
 
         private void AddStatisticsListener(GameObject stat, int index)
