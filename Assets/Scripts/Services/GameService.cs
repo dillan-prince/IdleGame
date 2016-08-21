@@ -273,7 +273,7 @@ namespace Assets.Scripts.Services
         private void UpdateTimeRemaining(ShopModel shop)
         {
             TimeSpan time = TimeSpan.FromSeconds(shop.TimeRemaining);
-            _timeRemainings[shop.Id].text = shop.TimeToComplete > .01 ? string.Format("{0}:{1}:{2}.{3}", time.Hours, time.Minutes, time.Seconds, time.Milliseconds) : "Really fast!";
+            _timeRemainings[shop.Id].text = shop.TimeToComplete > .02 ? string.Format("{0:d2}:{1:d2}:{2:d2}.{3:d2}", time.Hours, time.Minutes, time.Seconds, time.Milliseconds) : "Really fast!";
         }
 
         private void UpdatePlayerMoney()
