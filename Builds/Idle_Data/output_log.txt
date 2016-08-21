@@ -16,26 +16,23 @@ Platform assembly: C:\Users\Dillan\OneDrive\Games\IdleGame\Builds\Idle_Data\Mana
 Loading C:\Users\Dillan\OneDrive\Games\IdleGame\Builds\Idle_Data\Managed\UnityEngine.Networking.dll into Unity Child Domain
 Platform assembly: C:\Users\Dillan\OneDrive\Games\IdleGame\Builds\Idle_Data\Managed\UnityEngine.Analytics.dll (this message is harmless)
 Loading C:\Users\Dillan\OneDrive\Games\IdleGame\Builds\Idle_Data\Managed\UnityEngine.Analytics.dll into Unity Child Domain
-- Completed reload, in  0.091 seconds
+- Completed reload, in  0.131 seconds
 Platform assembly: C:\Users\Dillan\OneDrive\Games\IdleGame\Builds\Idle_Data\Managed\System.Core.dll (this message is harmless)
 Platform assembly: C:\Users\Dillan\OneDrive\Games\IdleGame\Builds\Idle_Data\Managed\System.dll (this message is harmless)
 desktop: 1920x1080 60Hz; virtual: 1920x1080 at 0,0
 <RI> Initializing input.
 <RI> Input initialized.
 <RI> Initialized touch support.
-UnloadTime: 0.902000 ms
+UnloadTime: 1.027155 ms
 Unloading 5 Unused Serialized files (Serialized files now loaded: 0)
-UnloadTime: 5.011600 ms
+UnloadTime: 12.329289 ms
 
-Unloading 3 unused Assets to reduce memory usage. Loaded Objects now: 198.
-Total: 0.255688 ms (FindLiveObjects: 0.030800 ms CreateObjectMapping: 0.034711 ms MarkObjects: 0.177955 ms  DeleteObjects: 0.004888 ms)
+Unloading 3 unused Assets to reduce memory usage. Loaded Objects now: 199.
+Total: 0.301644 ms (FindLiveObjects: 0.031288 ms CreateObjectMapping: 0.020533 ms MarkObjects: 0.236133 ms  DeleteObjects: 0.006844 ms)
 
 Unloading 4 Unused Serialized files (Serialized files now loaded: 0)
-UnloadTime: 0.489866 ms
+UnloadTime: 0.586177 ms
 
-Unloading 1 unused Assets to reduce memory usage. Loaded Objects now: 592.
-Total: 0.625777 ms (FindLiveObjects: 0.027377 ms CreateObjectMapping: 0.016133 ms MarkObjects: 0.569555 ms  DeleteObjects: 0.007333 ms)
+Unloading 1 unused Assets to reduce memory usage. Loaded Objects now: 594.
+Total: 0.754844 ms (FindLiveObjects: 0.033244 ms CreateObjectMapping: 0.018577 ms MarkObjects: 0.688844 ms  DeleteObjects: 0.006844 ms)
 
-Setting up 2 worker threads for Enlighten.
-  Thread -> id: 1c2c -> priority: 1 
-  Thread -> id: 3170 -> priority: 1 

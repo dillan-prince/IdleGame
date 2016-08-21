@@ -18,7 +18,7 @@ namespace Assets.Scripts.Controllers
 
         void Awake()
         {
-            PlayerPrefs.DeleteAll();
+            //PlayerPrefs.DeleteAll();
             _gameService = GetComponent<GameService>();
         }
 
