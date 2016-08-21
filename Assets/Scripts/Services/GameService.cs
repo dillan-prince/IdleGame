@@ -29,6 +29,7 @@ namespace Assets.Scripts.Services
         public GameObject _menuButton;
         public GameObject _tooltip;
         public GameObject _statisticsExpandableList;
+        public GameObject _notification;
 
         void Awake()
         {
@@ -212,6 +213,7 @@ namespace Assets.Scripts.Services
             for (int i = 0; i < shopUnlocksReached.Count; i++)
             {
                 UnlockModel shopUnlockReached = shopUnlocksReached[i];
+                StartCoroutine(NotifyPlayerOfUnlock(shopUnlockReached));
                 player.Shops[shopUnlockReached.AffectsShopId].Multiplier *= shopUnlockReached.ProfitMultiplier;
                 player.Shops[shopUnlockReached.AffectsShopId].TimeToComplete *= shopUnlockReached.SpeedMultiplier;
 
@@ -235,6 +237,7 @@ namespace Assets.Scripts.Services
                 for (int i = 0; i < globalUnlocksReached.Count; i++)
                 {
                     UnlockModel globalUnlockReached = globalUnlocksReached[i];
+                    StartCoroutine(NotifyPlayerOfUnlock(globalUnlockReached));
                     foreach (ShopModel shop in player.Shops)
                     {
                         shop.Multiplier *= globalUnlockReached.ProfitMultiplier;
@@ -252,6 +255,60 @@ namespace Assets.Scripts.Services
                     }
                 }
             }
+        }
+
+        private IEnumerator NotifyPlayerOfUnlock(UnlockModel unlock)
+        {
+            PlayerModel player = _gameRepository.GetPlayer();
+            GameObject notification = Instantiate(_notification);
+            notification.transform.SetParent(GameObject.FindGameObjectWithTag("Canvas").transform, false);
+
+            Text description = notification.GetComponentsInChildren<Text>()[1];
+            if (unlock.ShopId != 10)
+            {
+                description.text = string.Format("You reached level {0} {1}!\n", unlock.Level, player.Shops[unlock.ShopId].Name);
+                if (unlock.ProfitMultiplier == 1)
+                    description.text = string.Format("{0}Speed of {1} multiplied by {2}!", description.text, player.Shops[unlock.AffectsShopId].Name, unlock.SpeedMultiplier);
+                else
+                    description.text = string.Format("{0}Profits of {1} multiplied by {2}!", description.text, player.Shops[unlock.AffectsShopId].Name, unlock.ProfitMultiplier);
+
+                for (int i = 0; i < 25; i++)
+                {
+                    notification.transform.localPosition = new Vector2(-362, notification.transform.localPosition.y + 6.4f);
+                    yield return null;
+                }
+
+                yield return new WaitForSeconds(3);
+
+                for (int i = 0; i < 25; i++)
+                {
+                    notification.transform.localPosition = new Vector2(-362, notification.transform.localPosition.y - 6.4f);
+                    yield return null;
+                }
+            }
+            else
+            {
+                description.text = string.Format("You reached level {0} everywhere!\n", unlock.Level);
+                if (unlock.ProfitMultiplier == 1)
+                    description.text = string.Format("{0}Speed of all shops multiplied by {1}!", description.text, unlock.SpeedMultiplier);
+                else
+                    description.text = string.Format("{0}Profits of all shops multiplied by {1}!", description.text, unlock.ProfitMultiplier);
+
+                for (int i = 0; i < 25; i++)
+                {
+                    notification.transform.localPosition = new Vector2(-362, notification.transform.localPosition.y + 12.72f);
+                    yield return null;
+                }
+
+                yield return new WaitForSeconds(3);
+
+                for (int i = 0; i < 25; i++)
+                {
+                    notification.transform.localPosition = new Vector2(-362, notification.transform.localPosition.y - 12.72f);
+                    yield return null;
+                }
+            }
+            Destroy(notification);
         }
 
         private void UpdateCostOfShops()
@@ -273,7 +330,7 @@ namespace Assets.Scripts.Services
         private void UpdateTimeRemaining(ShopModel shop)
         {
             TimeSpan time = TimeSpan.FromSeconds(shop.TimeRemaining);
-            _timeRemainings[shop.Id].text = shop.TimeToComplete > .02 ? string.Format("{0:d2}:{1:d2}:{2:d2}.{3:d2}", time.Hours, time.Minutes, time.Seconds, time.Milliseconds) : "Really fast!";
+            _timeRemainings[shop.Id].text = shop.TimeToComplete > .02 ? string.Format("{0:d2}:{1:d2}:{2:d2}.{3:d3}", time.Hours, time.Minutes, time.Seconds, time.Milliseconds) : "Really fast!";
         }
 
         private void UpdatePlayerMoney()
