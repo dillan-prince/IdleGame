@@ -257,60 +257,6 @@ namespace Assets.Scripts.Services
             }
         }
 
-        private IEnumerator NotifyPlayerOfUnlock(UnlockModel unlock)
-        {
-            PlayerModel player = _gameRepository.GetPlayer();
-            GameObject notification = Instantiate(_notification);
-            notification.transform.SetParent(GameObject.FindGameObjectWithTag("Canvas").transform, false);
-
-            Text description = notification.GetComponentsInChildren<Text>()[1];
-            if (unlock.ShopId != 10)
-            {
-                description.text = string.Format("You reached level {0} {1}!\n", unlock.Level, player.Shops[unlock.ShopId].Name);
-                if (unlock.ProfitMultiplier == 1)
-                    description.text = string.Format("{0}Speed of {1} multiplied by {2}!", description.text, player.Shops[unlock.AffectsShopId].Name, unlock.SpeedMultiplier);
-                else
-                    description.text = string.Format("{0}Profits of {1} multiplied by {2}!", description.text, player.Shops[unlock.AffectsShopId].Name, unlock.ProfitMultiplier);
-
-                for (int i = 0; i < 25; i++)
-                {
-                    notification.transform.localPosition = new Vector2(-362, notification.transform.localPosition.y + 6.4f);
-                    yield return null;
-                }
-
-                yield return new WaitForSeconds(3);
-
-                for (int i = 0; i < 25; i++)
-                {
-                    notification.transform.localPosition = new Vector2(-362, notification.transform.localPosition.y - 6.4f);
-                    yield return null;
-                }
-            }
-            else
-            {
-                description.text = string.Format("You reached level {0} everywhere!\n", unlock.Level);
-                if (unlock.ProfitMultiplier == 1)
-                    description.text = string.Format("{0}Speed of all shops multiplied by {1}!", description.text, unlock.SpeedMultiplier);
-                else
-                    description.text = string.Format("{0}Profits of all shops multiplied by {1}!", description.text, unlock.ProfitMultiplier);
-
-                for (int i = 0; i < 25; i++)
-                {
-                    notification.transform.localPosition = new Vector2(-362, notification.transform.localPosition.y + 12.72f);
-                    yield return null;
-                }
-
-                yield return new WaitForSeconds(3);
-
-                for (int i = 0; i < 25; i++)
-                {
-                    notification.transform.localPosition = new Vector2(-362, notification.transform.localPosition.y - 12.72f);
-                    yield return null;
-                }
-            }
-            Destroy(notification);
-        }
-
         private void UpdateCostOfShops()
         {
             for (int i = 0; i < _shopCosts.Length; i++)
@@ -592,6 +538,60 @@ namespace Assets.Scripts.Services
 
             if (shop.Manager)
                 StartCoroutine(WorkShop(index));
+        }
+
+        private IEnumerator NotifyPlayerOfUnlock(UnlockModel unlock)
+        {
+            PlayerModel player = _gameRepository.GetPlayer();
+            GameObject notification = Instantiate(_notification);
+            notification.transform.SetParent(GameObject.FindGameObjectWithTag("Canvas").transform, false);
+
+            Text description = notification.GetComponentsInChildren<Text>()[1];
+            if (unlock.ShopId != 10)
+            {
+                description.text = string.Format("You reached level {0} {1}!\n", unlock.Level, player.Shops[unlock.ShopId].Name);
+                if (unlock.ProfitMultiplier == 1)
+                    description.text = string.Format("{0}Speed of {1} multiplied by {2}!", description.text, player.Shops[unlock.AffectsShopId].Name, unlock.SpeedMultiplier);
+                else
+                    description.text = string.Format("{0}Profits of {1} multiplied by {2}!", description.text, player.Shops[unlock.AffectsShopId].Name, unlock.ProfitMultiplier);
+
+                for (int i = 0; i < 25; i++)
+                {
+                    notification.transform.localPosition = new Vector2(-362, notification.transform.localPosition.y + 6.4f);
+                    yield return null;
+                }
+
+                yield return new WaitForSeconds(3);
+
+                for (int i = 0; i < 25; i++)
+                {
+                    notification.transform.localPosition = new Vector2(-362, notification.transform.localPosition.y - 6.4f);
+                    yield return null;
+                }
+            }
+            else
+            {
+                description.text = string.Format("You reached level {0} everywhere!\n", unlock.Level);
+                if (unlock.ProfitMultiplier == 1)
+                    description.text = string.Format("{0}Speed of all shops multiplied by {1}!", description.text, unlock.SpeedMultiplier);
+                else
+                    description.text = string.Format("{0}Profits of all shops multiplied by {1}!", description.text, unlock.ProfitMultiplier);
+
+                for (int i = 0; i < 25; i++)
+                {
+                    notification.transform.localPosition = new Vector2(-362, notification.transform.localPosition.y + 12.72f);
+                    yield return null;
+                }
+
+                yield return new WaitForSeconds(3);
+
+                for (int i = 0; i < 25; i++)
+                {
+                    notification.transform.localPosition = new Vector2(-362, notification.transform.localPosition.y - 12.72f);
+                    yield return null;
+                }
+            }
+            Destroy(notification);
         }
         #endregion
     }
