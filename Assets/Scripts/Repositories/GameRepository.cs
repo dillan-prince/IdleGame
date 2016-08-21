@@ -197,7 +197,7 @@ namespace Assets.Scripts.Repositories
         private PlayerModel GenerateNewPlayer()
         {
             PlayerModel player = new PlayerModel();
-            player.Money = 1e50;
+            player.Money = 0;
             player.GlobalMultiplier = 1;
             player.RevenuePerSecond = 0;
             player.Shops = _shops;
