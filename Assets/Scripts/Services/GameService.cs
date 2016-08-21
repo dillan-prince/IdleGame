@@ -95,6 +95,10 @@ namespace Assets.Scripts.Services
 
             if (player.Money > manager.Cost)
             {
+                GameObject tooltip = GameObject.FindGameObjectWithTag("Tooltip");
+                if (tooltip != null)
+                    Destroy(tooltip);
+
                 player.Shops[manager.ShopId].InitialCost *= manager.Multiplier;
 
                 if (index < 10)
@@ -113,6 +117,10 @@ namespace Assets.Scripts.Services
 
         public void PurchaseUpgrade(int index)
         {
+            GameObject tooltip = GameObject.FindGameObjectWithTag("Tooltip");
+            if (tooltip != null)
+                Destroy(tooltip);
+
             PlayerModel player = _gameRepository.GetPlayer();
             List<UpgradeModel> upgrades = _gameRepository.GetUpgrades();
             UpgradeModel upgrade = upgrades.FirstOrDefault(u => u.Id == index);
