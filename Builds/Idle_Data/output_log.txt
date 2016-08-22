@@ -16,26 +16,26 @@ Platform assembly: C:\Users\Dillan\OneDrive\Games\IdleGame\Builds\Idle_Data\Mana
 Loading C:\Users\Dillan\OneDrive\Games\IdleGame\Builds\Idle_Data\Managed\UnityEngine.Networking.dll into Unity Child Domain
 Platform assembly: C:\Users\Dillan\OneDrive\Games\IdleGame\Builds\Idle_Data\Managed\UnityEngine.Analytics.dll (this message is harmless)
 Loading C:\Users\Dillan\OneDrive\Games\IdleGame\Builds\Idle_Data\Managed\UnityEngine.Analytics.dll into Unity Child Domain
-- Completed reload, in  0.078 seconds
+- Completed reload, in  0.085 seconds
 Platform assembly: C:\Users\Dillan\OneDrive\Games\IdleGame\Builds\Idle_Data\Managed\System.Core.dll (this message is harmless)
 Platform assembly: C:\Users\Dillan\OneDrive\Games\IdleGame\Builds\Idle_Data\Managed\System.dll (this message is harmless)
 desktop: 1920x1080 60Hz; virtual: 1920x1080 at 0,0
 <RI> Initializing input.
 <RI> Input initialized.
 <RI> Initialized touch support.
-UnloadTime: 1.021289 ms
+UnloadTime: 1.229066 ms
 Unloading 5 Unused Serialized files (Serialized files now loaded: 0)
-UnloadTime: 6.111111 ms
+UnloadTime: 61.449432 ms
 
 Unloading 3 unused Assets to reduce memory usage. Loaded Objects now: 199.
-Total: 0.235644 ms (FindLiveObjects: 0.012222 ms CreateObjectMapping: 0.023955 ms MarkObjects: 0.186266 ms  DeleteObjects: 0.005866 ms)
+Total: 0.226355 ms (FindLiveObjects: 0.012711 ms CreateObjectMapping: 0.023955 ms MarkObjects: 0.178444 ms  DeleteObjects: 0.005377 ms)
 
 Unloading 4 Unused Serialized files (Serialized files now loaded: 0)
-UnloadTime: 0.582266 ms
+UnloadTime: 0.712800 ms
 
 Unloading 1 unused Assets to reduce memory usage. Loaded Objects now: 615.
-Total: 0.672222 ms (FindLiveObjects: 0.059155 ms CreateObjectMapping: 0.038622 ms MarkObjects: 0.561244 ms  DeleteObjects: 0.005377 ms)
+Total: 0.606711 ms (FindLiveObjects: 0.025422 ms CreateObjectMapping: 0.014666 ms MarkObjects: 0.547555 ms  DeleteObjects: 0.006355 ms)
 
 Setting up 2 worker threads for Enlighten.
-  Thread -> id: 580 -> priority: 1 
-  Thread -> id: 2580 -> priority: 1 
+  Thread -> id: 354c -> priority: 1 
+  Thread -> id: 918 -> priority: 1 

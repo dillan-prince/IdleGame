@@ -9,7 +9,7 @@ namespace Assets.Scripts.Interfaces
     public interface IGameRepository
     {
         void Save();
-        PlayerModel Load();
+        void Load();
         PlayerModel GetPlayer();
         List<UpgradeModel> GetUpgrades();
         List<ManagerModel> GetManagers();

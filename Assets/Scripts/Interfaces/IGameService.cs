@@ -18,6 +18,6 @@ namespace Assets.Scripts.Interfaces
         void PurchaseManager(int index);
         void PurchaseUpgrade(int index);
         void ChangeBuyMultiple();
-        IEnumerator WorkShop(int index);
+        void WorkShop(int index);
     }
 }

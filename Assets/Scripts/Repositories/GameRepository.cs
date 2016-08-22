@@ -66,7 +66,7 @@ namespace Assets.Scripts.Repositories
             }
         }
 
-        public PlayerModel Load()
+        public void Load()
         {
             player = GenerateNewPlayer();
             player.BuyMultiple = 1;
@@ -110,7 +110,6 @@ namespace Assets.Scripts.Repositories
 
                 player.Money += CalculateOfflineEarnings();
             }
-            return player;
         }
 
         public PlayerModel GetPlayer()

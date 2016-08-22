@@ -41,7 +41,7 @@ namespace Assets.Scripts.Controllers
 
         public void WorkShop(int index)
         {
-            StartCoroutine(_gameService.WorkShop(index));
+            _gameService.WorkShop(index);
         }
 
         public void ChangeBuyMultiple()

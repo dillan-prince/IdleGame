@@ -30,10 +30,37 @@ namespace Assets.Scripts.Services
         public GameObject _tooltip;
         public GameObject _statisticsExpandableList;
         public GameObject _notification;
-
+        
         void Awake()
         {
             _gameRepository = GetComponent<GameRepository>();
+        }
+
+        void Update()
+        {
+            PlayerModel player = _gameRepository.GetPlayer();
+            foreach (ShopModel shop in player.Shops)
+            {
+                if (shop.Working)
+                {
+                    shop.TimeRemaining -= Time.deltaTime;
+                    UpdateTimeRemaining(shop);
+
+                    if (shop.TimeRemaining <= 0)
+                    {
+                        player.Money += _gameRepository.CalculateCurrentProfitOfShop(shop);
+                        UpdatePlayerMoney();
+                        if (shop.Manager)
+                            shop.TimeRemaining = shop.TimeToComplete;
+                        else
+                        {
+                            shop.Working = false;
+                            shop.TimeRemaining = 0;
+                        }
+                        UpdateTimeRemaining(shop);
+                    }
+                }
+            }
         }
 
         #region Public Methods
@@ -44,13 +71,7 @@ namespace Assets.Scripts.Services
 
         public void Load()
         {
-            PlayerModel player = _gameRepository.Load();
-
-            foreach (ShopModel shop in player.Shops)
-            {
-                if (shop.Working)
-                    StartCoroutine(WorkPartialShop(shop.Id));
-            }
+            _gameRepository.Load();
         }
 
         public void HideMenus()
@@ -169,37 +190,13 @@ namespace Assets.Scripts.Services
             UpdateCostOfShops();
         }
 
-        public IEnumerator WorkShop(int index)
+        public void WorkShop(int index)
         {
             PlayerModel player = _gameRepository.GetPlayer();
-            ShopModel shop = player.Shops[index];
-            Stopwatch watch;
-            if (!shop.Working && shop.NumberOwned > 0)
+            if (!player.Shops[index].Working && player.Shops[index].NumberOwned > 0)
             {
-                shop.Working = true;
-                shop.TimeRemaining = shop.TimeToComplete;
-
-                do
-                {
-                    UpdateTimeRemaining(shop);
-
-                    watch = Stopwatch.StartNew();
-                    yield return null;
-                    watch.Stop();
-
-                    shop.TimeRemaining -= watch.Elapsed.TotalSeconds;
-                } while (shop.TimeRemaining > 0);
-
-                player.Money += _gameRepository.CalculateCurrentProfitOfShop(shop);
-
-                shop.Working = false;
-                shop.TimeRemaining = 0;
-
-                UpdatePlayerMoney();
-                UpdateTimeRemaining(shop);
-
-                if (shop.Manager)
-                    StartCoroutine(WorkShop(index));
+                player.Shops[index].Working = true;
+                player.Shops[index].TimeRemaining = player.Shops[index].TimeToComplete;
             }
         }
         #endregion
@@ -513,32 +510,32 @@ namespace Assets.Scripts.Services
             }
         }
 
-        private IEnumerator WorkPartialShop(int index)
-        {
-            PlayerModel player = _gameRepository.GetPlayer();
-            ShopModel shop = player.Shops[index];
-            Stopwatch watch;
-            do
-            {
-                UpdateTimeRemaining(shop);
+        //private IEnumerator WorkPartialShop(int index)
+        //{
+        //    PlayerModel player = _gameRepository.GetPlayer();
+        //    ShopModel shop = player.Shops[index];
+        //    Stopwatch watch;
+        //    do
+        //    {
+        //        UpdateTimeRemaining(shop);
 
-                watch = Stopwatch.StartNew();
-                yield return null;
-                watch.Stop();
+        //        watch = Stopwatch.StartNew();
+        //        yield return null;
+        //        watch.Stop();
 
-                shop.TimeRemaining -= watch.Elapsed.TotalSeconds;
-            } while (shop.TimeRemaining > 0);
+        //        shop.TimeRemaining -= watch.Elapsed.TotalSeconds;
+        //    } while (shop.TimeRemaining > 0);
 
-            player.Money += _gameRepository.CalculateCurrentProfitOfShop(shop);
-            shop.Working = false;
-            shop.TimeRemaining = 0;
+        //    player.Money += _gameRepository.CalculateCurrentProfitOfShop(shop);
+        //    shop.Working = false;
+        //    shop.TimeRemaining = 0;
 
-            UpdatePlayerMoney();
-            UpdateTimeRemaining(shop);
+        //    UpdatePlayerMoney();
+        //    UpdateTimeRemaining(shop);
 
-            if (shop.Manager)
-                StartCoroutine(WorkShop(index));
-        }
+        //    if (shop.Manager)
+        //        StartCoroutine(WorkShop(index));
+        //}
 
         private IEnumerator NotifyPlayerOfUnlock(UnlockModel unlock)
         {
