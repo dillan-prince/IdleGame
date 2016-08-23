@@ -69,7 +69,10 @@ namespace Assets.Scripts.Repositories
         public void Load()
         {
             player = GenerateNewPlayer();
-            player.BuyMultiple = 1;
+            player.BuyMultiple = new List<int>();
+            for (int i = 0; i < 10; i++)
+                player.BuyMultiple.Add(1);
+            
             if (Convert.ToDouble(PlayerPrefs.GetString("player.Money", "-1")) != -1)
             {
                 player.Money = Convert.ToDouble(PlayerPrefs.GetString("player.Money"));
@@ -145,7 +148,7 @@ namespace Assets.Scripts.Repositories
         public double CalculateCostOfShop(int index)
         {
             double cost = 0;
-            for (int i = player.Shops[index].NumberOwned; i < player.Shops[index].NumberOwned + player.BuyMultiple; i++)
+            for (int i = player.Shops[index].NumberOwned; i < player.Shops[index].NumberOwned + player.BuyMultiple[index]; i++)
                 cost += player.Shops[index].InitialCost * Math.Pow(player.Shops[index].GrowthRate, i);
 
             return cost;

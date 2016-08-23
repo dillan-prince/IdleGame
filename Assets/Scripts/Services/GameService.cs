@@ -20,6 +20,7 @@ namespace Assets.Scripts.Services
         public Text[] _timeRemainings;
         public Text[] _shopAmountOwneds;
         public Text[] _shopCosts;
+        public Text[] _buyAmountTexts;
 
         public Text _playerMoney;
         public Text _buyMultipleButtonText;
@@ -61,7 +62,7 @@ namespace Assets.Scripts.Services
                         else
                         {
                             shop.Working = false;
-                            shop.TimeRemaining = 0;
+                            shop.TimeRemaining = shop.TimeRemaining + shop.TimeRemaining;
                         }
                         UpdateTimeRemaining(shop);
                     }
@@ -134,8 +135,8 @@ namespace Assets.Scripts.Services
             if (player.Money > _gameRepository.CalculateCostOfShop(index))
             {
                 player.Money -= _gameRepository.CalculateCostOfShop(index);
-                player.Shops[index].NumberOwned += player.BuyMultiple;
-                CheckForUnlocks(index, player.Shops[index].NumberOwned - player.BuyMultiple);
+                player.Shops[index].NumberOwned += player.BuyMultiple[index];
+                CheckForUnlocks(index, player.Shops[index].NumberOwned - player.BuyMultiple[index]);
 
                 UpdateAmountOwned();
                 UpdateCostOfShops();
@@ -162,6 +163,11 @@ namespace Assets.Scripts.Services
                 if (index < 10)
                 {
                     player.Shops[index].Manager = true;
+                    if (player.Shops[index].NumberOwned > 0)
+                    {
+                        player.Shops[index].Working = true;
+                        player.Shops[index].TimeRemaining = player.Shops[index].TimeToComplete; 
+                    }
                     UpdateStatistics();
                 }
 
@@ -202,26 +208,35 @@ namespace Assets.Scripts.Services
         public void ChangeBuyMultiple()
         {
             PlayerModel player = _gameRepository.GetPlayer();
+            int newBuyMultiple = 0;
 
             switch (_buyMultipleButtonText.text)
             {
                 case "x1":
-                    player.BuyMultiple = 10;
+                    newBuyMultiple = 10;
                     _buyMultipleButtonText.text = "x10";
                     break;
                 case "x10":
-                    player.BuyMultiple = 100;
+                    newBuyMultiple = 100;
                     _buyMultipleButtonText.text = "x100";
                     break;
                 case "x100":
-                    player.BuyMultiple = 250;
-                    _buyMultipleButtonText.text = "x250";
+                    newBuyMultiple = 0;
+                    _buyMultipleButtonText.text = "MAX";
                     break;
-                case "x250":
-                    player.BuyMultiple = 1;
+                case "MAX":
+                    newBuyMultiple = 1;
                     _buyMultipleButtonText.text = "x1";
                     break;
             }
+
+            for (int i = 0; i < player.BuyMultiple.Count; i++)
+                player.BuyMultiple[i] = newBuyMultiple;
+
+            if (newBuyMultiple == 0)
+                InvokeRepeating("CalculateNewBuyMultiple", 0, .1f);
+            else
+                CancelInvoke("CalculateNewBuyMultiple");
 
             UpdateCostOfShops();
         }
@@ -238,6 +253,28 @@ namespace Assets.Scripts.Services
         #endregion
 
         #region Private Methods
+        private void CalculateNewBuyMultiple()
+        {
+            PlayerModel player = _gameRepository.GetPlayer();
+            for (int i = 0; i < player.Shops.Count; i++)
+            {
+                double cost = 0;
+                bool canAfford = true;
+                player.BuyMultiple[i] = 1;
+                while (canAfford)
+                {
+                    cost += player.Shops[i].InitialCost * Math.Pow(player.Shops[i].GrowthRate, player.Shops[i].NumberOwned + player.BuyMultiple[i] - 1);
+                    if (player.Money > cost)
+                        player.BuyMultiple[i]++;
+                    else
+                        canAfford = false;
+                }
+                player.BuyMultiple[i] -= player.BuyMultiple[i] == 1 ? 0 : 1;
+            }
+
+            UpdateCostOfShops();
+        }
+
         private void CheckForUnlocks(int index, int oldLevel)
         {
             PlayerModel player = _gameRepository.GetPlayer();
@@ -292,10 +329,12 @@ namespace Assets.Scripts.Services
 
         private void UpdateCostOfShops()
         {
+            PlayerModel player = _gameRepository.GetPlayer();
             for (int i = 0; i < _shopCosts.Length; i++)
             {
                 double cost = _gameRepository.CalculateCostOfShop(i);
-                _shopCosts[i].text = " $" + cost.ToString("e2");
+                _shopCosts[i].text = string.Format("${0:e2}", cost);
+                _buyAmountTexts[i].text = string.Format("x{0}", player.BuyMultiple[i]);
             }
         }
 
@@ -611,7 +650,7 @@ namespace Assets.Scripts.Services
             PlayerModel player = _gameRepository.GetPlayer();
             GameObject offlineEarnings = Instantiate(_offlineEarnings);
             offlineEarnings.transform.SetParent(GameObject.FindGameObjectWithTag("Canvas").transform, false);
-            offlineEarnings.GetComponentInChildren<Text>().text = string.Format("You earned ${0:e2} while offline!", player.OfflineEarnings);
+            offlineEarnings.GetComponentsInChildren<Text>()[0].text = string.Format("You earned ${0:e2} while offline!", player.OfflineEarnings);
 
             for (int i = 0; i < 50; i++)
             {

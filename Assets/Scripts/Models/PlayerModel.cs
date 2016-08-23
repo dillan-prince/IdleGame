@@ -10,7 +10,7 @@ namespace Assets.Scripts.Models
         public double Money { get; set; }
         public double AccumulativeMoney { get; set; }
         public double OfflineEarnings { get; set; }
-        public int BuyMultiple { get; set; }
+        public List<int> BuyMultiple { get; set; }
         public double GlobalMultiplier { get; set; }
         public double RevenuePerSecond { get; set; }
         public List<int> Upgrades { get; set; }
