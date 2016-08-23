@@ -32,6 +32,11 @@ namespace Assets.Scripts.Services
         public GameObject _notification;
         public GameObject _offlineEarnings;
 
+        public Button[] _purchaseShopButtons;
+
+        private static List<Button> _managerButtons;
+        private static List<Button> _upgradeButtons;
+
         void Awake()
         {
             _gameRepository = GetComponent<GameRepository>();
@@ -87,6 +92,29 @@ namespace Assets.Scripts.Services
             PlayerModel player = _gameRepository.GetPlayer();
             if (player.OfflineEarnings > 0)
                 StartCoroutine(DisplayOfflineEarningsNotification());
+        }
+
+        public void CheckEnableButtons()
+        {
+            PlayerModel player = _gameRepository.GetPlayer();
+            for (int i = 0; i < _purchaseShopButtons.Length; i++)
+                _purchaseShopButtons[i].interactable = player.Money >= _gameRepository.CalculateCostOfShop(i);
+
+            if (_managerButtons.Count == 6)
+            {
+                List<ManagerModel> managers = _gameRepository.GetManagers();
+                List<ManagerModel> managersToShow = managers.Where(m => !m.IsPurchased).OrderBy(m => m.Cost).Take(6).ToList();
+                for (int i = 0; i < managersToShow.Count; i++)
+                    _managerButtons[i].interactable = player.Money >= managersToShow[i].Cost;
+            }
+
+            if (_upgradeButtons.Count == 6)
+            {
+                List<UpgradeModel> upgrades = _gameRepository.GetUpgrades();
+                List<UpgradeModel> upgradesToShow = upgrades.Where(u => !u.IsPurchased).OrderBy(u => u.Cost).Take(6).ToList();
+                for (int i = 0; i < upgradesToShow.Count; i++)
+                    _upgradeButtons[i].interactable = player.Money > upgradesToShow[i].Cost;
+            }
         }
 
         public void RefreshCanvas()
@@ -352,6 +380,7 @@ namespace Assets.Scripts.Services
 
         private void UpdateManagers()
         {
+            _managerButtons = new List<Button>();
             GameObject[] oldManagers = GameObject.FindGameObjectsWithTag("Manager Button");
             foreach (GameObject oldManager in oldManagers)
             {
@@ -366,6 +395,7 @@ namespace Assets.Scripts.Services
             {
                 GameObject manager = Instantiate(_menuButton);
 
+                _managerButtons.Add(manager.GetComponent<Button>());
                 manager.transform.SetParent(_menus[0].transform, false);
                 manager.transform.localPosition = new Vector2(0, 210 - 70 * i);
                 manager.GetComponentInChildren<Text>().text = string.Format("{0}\n${1:e2}", managersToShow[i].Name, managersToShow[i].Cost);
@@ -374,10 +404,13 @@ namespace Assets.Scripts.Services
                 AddManagerListener(manager, managersToShow[i].Id);
                 AddTooltipForManagers(manager, managersToShow[i]);
             }
+
+
         }
 
         private void UpdateUpgrades()
         {
+            _upgradeButtons = new List<Button>();
             GameObject[] oldUpgrades = GameObject.FindGameObjectsWithTag("Upgrade Button");
             foreach (GameObject oldUpgrade in oldUpgrades)
             {
@@ -392,6 +425,7 @@ namespace Assets.Scripts.Services
             {
                 GameObject upgrade = Instantiate(_menuButton);
 
+                _upgradeButtons.Add(upgrade.GetComponent<Button>());
                 upgrade.transform.SetParent(_menus[1].transform, false);
                 upgrade.transform.localPosition = new Vector2(0, 210 - 70 * i);
                 upgrade.GetComponentInChildren<Text>().text = string.Format("{0}\n${1:e2}", upgradesToShow[i].Name, upgradesToShow[i].Cost);

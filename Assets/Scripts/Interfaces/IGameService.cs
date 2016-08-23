@@ -13,6 +13,7 @@ namespace Assets.Scripts.Interfaces
         void Save();
         void Load();
         void DisplayOfflineEarnings();
+        void CheckEnableButtons();
         void HideMenus();
         void RefreshCanvas();
         void Buy(int index);

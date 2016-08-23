@@ -29,6 +29,7 @@ namespace Assets.Scripts.Controllers
             DisplayOfflineEarnings();
             RefreshCanvas();
             InvokeRepeating("Save", 0, 1);
+            InvokeRepeating("CheckEnableButtons", 0, .1f);
         }
 
         #endregion
@@ -77,6 +78,11 @@ namespace Assets.Scripts.Controllers
         private void DisplayOfflineEarnings()
         {
             _gameService.DisplayOfflineEarnings();
+        }
+
+        private void CheckEnableButtons()
+        {
+            _gameService.CheckEnableButtons();
         }
 
         private void HideMenus()
