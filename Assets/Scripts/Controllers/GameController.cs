@@ -26,6 +26,7 @@ namespace Assets.Scripts.Controllers
         {
             Load();
             HideMenus();
+            DisplayOfflineEarnings();
             RefreshCanvas();
             InvokeRepeating("Save", 0, 1);
         }
@@ -71,6 +72,11 @@ namespace Assets.Scripts.Controllers
         private void Load()
         {
             _gameService.Load();
+        }
+
+        private void DisplayOfflineEarnings()
+        {
+            _gameService.DisplayOfflineEarnings();
         }
 
         private void HideMenus()

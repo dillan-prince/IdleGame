@@ -185,6 +185,7 @@ namespace Assets.Scripts.Repositories
                 }
             }
 
+            player.OfflineEarnings = offlineEarnings;
             return offlineEarnings;
         }
 

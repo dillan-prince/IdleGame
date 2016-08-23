@@ -30,7 +30,8 @@ namespace Assets.Scripts.Services
         public GameObject _tooltip;
         public GameObject _statisticsExpandableList;
         public GameObject _notification;
-        
+        public GameObject _offlineEarnings;
+
         void Awake()
         {
             _gameRepository = GetComponent<GameRepository>();
@@ -79,6 +80,13 @@ namespace Assets.Scripts.Services
             GameObject[] menus = GameObject.FindGameObjectsWithTag("Menu Panel");
             foreach (GameObject menu in menus)
                 menu.SetActive(false);
+        }
+
+        public void DisplayOfflineEarnings()
+        {
+            PlayerModel player = _gameRepository.GetPlayer();
+            if (player.OfflineEarnings > 0)
+                StartCoroutine(DisplayOfflineEarningsNotification());
         }
 
         public void RefreshCanvas()
@@ -510,33 +518,6 @@ namespace Assets.Scripts.Services
             }
         }
 
-        //private IEnumerator WorkPartialShop(int index)
-        //{
-        //    PlayerModel player = _gameRepository.GetPlayer();
-        //    ShopModel shop = player.Shops[index];
-        //    Stopwatch watch;
-        //    do
-        //    {
-        //        UpdateTimeRemaining(shop);
-
-        //        watch = Stopwatch.StartNew();
-        //        yield return null;
-        //        watch.Stop();
-
-        //        shop.TimeRemaining -= watch.Elapsed.TotalSeconds;
-        //    } while (shop.TimeRemaining > 0);
-
-        //    player.Money += _gameRepository.CalculateCurrentProfitOfShop(shop);
-        //    shop.Working = false;
-        //    shop.TimeRemaining = 0;
-
-        //    UpdatePlayerMoney();
-        //    UpdateTimeRemaining(shop);
-
-        //    if (shop.Manager)
-        //        StartCoroutine(WorkShop(index));
-        //}
-
         private IEnumerator NotifyPlayerOfUnlock(UnlockModel unlock)
         {
             PlayerModel player = _gameRepository.GetPlayer();
@@ -589,6 +570,29 @@ namespace Assets.Scripts.Services
                 }
             }
             Destroy(notification);
+        }
+
+        private IEnumerator DisplayOfflineEarningsNotification()
+        {
+            PlayerModel player = _gameRepository.GetPlayer();
+            GameObject offlineEarnings = Instantiate(_offlineEarnings);
+            offlineEarnings.transform.SetParent(GameObject.FindGameObjectWithTag("Canvas").transform, false);
+            offlineEarnings.GetComponentInChildren<Text>().text = string.Format("You earned ${0:e2} while offline!", player.OfflineEarnings);
+
+            for (int i = 0; i < 50; i++)
+            {
+                offlineEarnings.transform.localPosition = new Vector2(0, offlineEarnings.transform.localPosition.y - 3.2f);
+                yield return null;
+            }
+
+            yield return new WaitForSecondsRealtime(5);
+
+            for (int i = 0; i < 50; i++)
+            {
+                offlineEarnings.transform.localPosition = new Vector2(0, offlineEarnings.transform.localPosition.y + 3.2f);
+                yield return null;
+            }
+            Destroy(offlineEarnings);
         }
         #endregion
     }
